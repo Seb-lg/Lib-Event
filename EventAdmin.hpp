@@ -12,7 +12,7 @@
 
 class EventAdmin {
 public:
-	template<typename T = void>
+	template<typename T>
 	struct fcn {
 		using type  = T;
 		static const char* Get()

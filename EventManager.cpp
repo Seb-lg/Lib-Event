@@ -3,6 +3,7 @@
 //
 
 #include <algorithm>
+#include <iostream>
 
 #include "EventManager.hpp"
 
@@ -12,8 +13,28 @@ EventManager &EventManager::get()
 	return (manager);
 }
 
+EventManager::EventManager(): _isAlive(true),  _readThread([this](){
+	std::string in;
+
+	_mutexAlive.lock();
+	while (this->_isAlive) {
+		_mutexAlive.unlock();
+		std::getline (std::cin, in);
+		if (!in.empty()) {
+			fire(in);
+		}
+		_mutexAlive.lock();
+	}
+	_mutexAlive.unlock();
+})
+{}
+
 EventManager::~EventManager()
 {
+	_mutexAlive.lock();
+	_isAlive = false;
+	_mutexAlive.unlock();
+	_readThread.join();
 }
 
 void EventManager::_erase(struct trash toErase) {

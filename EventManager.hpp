@@ -7,6 +7,8 @@
 
 #include <unordered_map>
 #include <list>
+#include <thread>
+#include <mutex>
 #include "Event.hpp"
 
 class EventManager {
@@ -25,6 +27,8 @@ public:
 		std::string			second;
 		void				*third;
 	};
+
+	EventManager();
 
 	~EventManager();
 
@@ -76,6 +80,10 @@ public:
 
 private:
 	std::unordered_map<std::string, std::unordered_map<std::string, std::list<void*>>>	_map;
+
+	std::mutex	_mutexAlive;
+	bool		_isAlive;
+	std::thread	_readThread;
 };
 
 #endif //EVENT_EVENTMANAGER_HPP
