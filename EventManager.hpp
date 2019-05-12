@@ -6,9 +6,11 @@
 #define EVENT_EVENTMANAGER_HPP
 
 #include <unordered_map>
+#include <iostream>
 #include <list>
 #include <thread>
 #include <mutex>
+#include <any>
 #include "Event.hpp"
 
 class EventManager {
@@ -34,31 +36,32 @@ public:
 
 	static EventManager &get();
 
-	template<typename ...Args>
-	struct trash addHandler(std::string name, typename fcn<std::function<void(Args...)>>::type func) {
+	template<typename ...Args, typename T = void>
+	struct trash addHandler(std::string name, T func) {
 		struct trash ret;
-		ret.third = new Event<Args...>(func);
-		_map[name][std::string(fcn<Args...>::Get())].push_back(ret.third);
+		ret.third = new Event<Args...>(std::function<void(Args...)>(func));
+		_map[name][std::string(fcn<std::function<void(Args...)>>::Get())].push_back(ret.third);
 		ret.first = name;
-		ret.second = std::string(fcn<Args...>::Get());
+		ret.second = std::string(fcn<std::function<void(Args...)>>::Get());
 		return (ret);
 	}
 
-	struct trash addHandler(std::string name, typename fcn<std::function<void()>>::type func) {
+	/*struct trash addHandler(std::string name, std::any func) {
 		struct trash ret;
-		ret.third = new Event<>(func);
-		_map[name][std::string(fcn<void>::Get())].push_back(ret.third);
+		std::cout << func.type().name() << std::endl;
+		ret.third = new Event<>(std::any_cast<std::function<void()>>(func));
+		_map[name][std::string(func.type().name())].push_back(ret.third);
 		ret.first = name;
-		ret.second = std::string(fcn<void>::Get());
+		ret.second = std::string(func.type().name());
 		return (ret);
-	}
+	}*/
 
 	template<typename ...Args>
 	void fire(std::string name , Args... argc) {
 		auto aMap = _map.find(name);
 		if (aMap == _map.end())
 			return;
-		auto bMap = aMap->second.find(std::string(fcn<Args...>::Get()));
+		auto bMap = aMap->second.find(std::string(fcn<std::function<void(Args...)>>::Get()));
 		if (bMap == aMap->second.end())
 			return;
 		for (void *func : bMap->second)
@@ -69,7 +72,7 @@ public:
 		auto aMap = _map.find(name);
 		if (aMap == _map.end())
 			return;
-		auto bMap = aMap->second.find(std::string(fcn<void>::Get()));
+		auto bMap = aMap->second.find(std::string(fcn<std::function<void()>>::Get()));
 		if (bMap == aMap->second.end())
 			return;
 		for (void *func : bMap->second)

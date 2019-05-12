@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <list>
+#include <any>
 
 #include "EventManager.hpp"
 
@@ -14,6 +15,7 @@ class EventAdmin {
 public:
 	template<typename T>
 	struct fcn {
+		std::any oui;
 		using type  = T;
 		static const char* Get()
 		{
